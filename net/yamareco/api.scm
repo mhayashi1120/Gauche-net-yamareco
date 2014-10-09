@@ -15,6 +15,7 @@
 
    ;; OAuth
    yamareco-authenticate
+   yamareco-write-credential yamareco-read-credential
 
    ;; no oauth
    get-area-list/json
@@ -92,11 +93,15 @@
            [else code])))))
 
   (define (request code)
-    (oauth2-request-auth-token
-     "https://,(api-server)/api/v1/oauth/access_token"
-     code redirect-uri client-id
-     ;; optional param
-     :client-secret client-secret))
+    (let1 json (oauth2-request-auth-token
+                #`"https://,(api-server)/api/v1/oauth/access_token"
+                code redirect-uri client-id
+                ;; optional param
+                :client-secret client-secret)
+      (unless (= (assoc-ref json "error") 0)
+        (errorf "failed yamareco authentication ~a"
+                (assoc-ref json "error_message")))
+      (assoc-ref json "access_token")))
 
   (define (make-cred token)
     (make <yamareco-cred>
@@ -108,6 +113,21 @@
          [token (request code)])
 
     (make-cred token)))
+
+;;;
+;;; Utilities
+;;;
+
+(define (yamareco-read-credential file)
+  (with-input-from-file file
+    (^() (oauth2-read-token <yamareco-cred>))))
+
+(define (yamareco-write-credential cred file)
+  (with-output-to-file file
+    (^() (oauth2-write-token cred)))
+  (sys-chmod file #o600))
+
+
 
 ;;
 ;; Low level API
