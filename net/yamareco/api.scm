@@ -21,15 +21,19 @@
    get-area-list/json
    get-genre-list/json
    get-record-list/json
-   search-record/json
    search-poi/json
    nearby-poi/json
    get-type-list/json
    get-user-info/json
+   search-plan/json
+   get-plan-list/json
 
    ;; require oauth
+   search-record/json
    get-cheer-list/json
    get-record/json
+   get-plan/json
+   get-plan-comment-list/json
 
    ;; low level API
    GET/json
@@ -203,18 +207,18 @@
       (set! path #`",|path|?max_id=,|max-id|"))
     (GET/json path)))
 
-;; https://sites.google.com/site/apiforyamareco/api/rest-api#TOC-2.16-searchRec-OAuth-
+;; https://sites.google.com/site/apiforyamareco/api/api_rec#TOC-2.-searchRec-OAuth-
 (define (search-record/json
-         place
+         cred place
          :key (page 1) (area-id 0) (genre-id 0)
          (is-photo 0) (is-track 0) (ptid 0)
          :allow-other-keys _keys)
   (let1 request (api-params _keys
                             place page area-id genre-id
                             is-photo is-track ptid)
-    (POST/json "/searchRec" request)))
+    (POST/json "/searchRec" request cred)))
 
-;; https://sites.google.com/site/apiforyamareco/api/rest-api#TOC-2.17-searchPoi-OAuth-
+;; https://sites.google.com/site/apiforyamareco/api/api_other#TOC-3.-searchPoi-OAuth-
 (define (search-poi/json
          name
          :key (page 1) (type-id 0) (area-id 0)
@@ -222,13 +226,25 @@
   (let1 request (api-params _keys page name type-id area-id)
     (POST/json "/searchPoi" request)))
 
-;; https://sites.google.com/site/apiforyamareco/api/rest-api#TOC-2.18-nearbyPoi-OAuth-
+;; https://sites.google.com/site/apiforyamareco/api/api_other#TOC-2.18-nearbyPoi-OAuth-
 ;; lat, lon is not described as required, but required parameter. (documentation mistake)
 (define (nearby-poi/json lat lon range
          :key (page 1) (type-id 0)
          :allow-other-keys _keys)
   (let1 request (api-params _keys lat lon page range type-id)
     (POST/json "/nearbyPoi" request)))
+
+;; https://sites.google.com/site/apiforyamareco/api/api_plan#TOC-2.-searchPlan-OAuth-
+(define (search-plan/json page place
+                          :key (group-id #f)
+                          (area-id 0) (genre-id 0)
+                          (is-track 0) (ptid 0)
+                          :allow-other-keys _keys)
+  (let1 request (api-params _keys page place
+                            group-id area-id genre-id
+                            is-track ptid)
+    (POST/json "/searchPlan" request)))
+
 
 (define (get-type-list/json)
   (GET/json "/getTypelist"))
@@ -250,3 +266,21 @@
   (let1 path "/getRec"
     (set! path #`",|path|/,|rec-id|")
     (GET/json path cred)))
+
+(define (get-plan-list/json :key (page #f) (user-id #f))
+  (let1 path "/getPlanlist"
+    (cond
+     [(and user-id page)
+      (set! path #`",|path|/,|user-id|/,|page|")]
+     [page
+      (set! path #`",|path|/,|page|")])
+    (GET/json path)))
+
+(define (get-plan/json cred plan-id)
+  (let1 path #`"/getPlan/,|plan-id|"
+    (GET/json path cred)))
+
+(define (get-plan-comment-list/json cred plan-id)
+  (let1 path #`"/getPlanCommentlist/,|plan-id|"
+    (GET/json path cred)))
+
