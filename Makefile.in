@@ -25,7 +25,7 @@ LOCAL_PATHS = "@LOCAL_PATHS@"
 # Module-specific stuff
 PACKAGE   = Gauche-net-yamareco
 
-ARCHFILES = 
+ARCHFILES =
 SCMFILES  = $(srcdir)/net/yamareco.scm
 HEADERS   =
 
@@ -59,12 +59,12 @@ uninstall :
 	$(INSTALL) -U $(GAUCHE_PKGLIBDIR)/.packages $(PACKAGE).gpd
 
 clean :
-	$(GAUCHE_PACKAGE) compile --clean $(net_yamareco_SRCS)
+	$(GAUCHE_PACKAGE) compile --clean net_yamareco $(net_yamareco_SRCS)
 	rm -rf core $(TARGET) $(GENERATED) *~ test.log so_locations
 
 distclean : clean
 	rm -rf $(CONFIG_GENERATED)
 
 maintainer-clean : clean
-	rm -rf $(CONFIG_GENERATED) configure VERSION
+	rm -rf $(CONFIG_GENERATED)  VERSION
 
