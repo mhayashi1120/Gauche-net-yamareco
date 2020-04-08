@@ -27,4 +27,4 @@ Web API での authentication のみ動作を確認しています。
     (let1 cred (yamareco-read-credential "/path/to/your/favorite/token")
 	  (GET/json cred "/getArealist"))
 
-みたいな感じで OAuth が必要な機能の利用ができます。
+という具合に OAuth が必要な機能の利用ができます。

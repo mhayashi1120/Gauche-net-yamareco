@@ -65,8 +65,9 @@
 (define-condition-type <yamareco-api-error> <error> #f
   )
 
-(define-class <yamareco-cred> (<oauth2-cred>)
-  ((client-id     :init-keyword :client-id)
+(define-class <yamareco-cred> ()
+  ((access-token  :init-keyword :access-token)
+   (client-id     :init-keyword :client-id)
    (client-secret :init-keyword :client-secret)))
 
 (define api-use-ssl
@@ -82,7 +83,7 @@
 (define (yamareco-authenticate client-id client-secret redirect-uri)
   (define (prompt)
     (let1 auth-url (oauth2-construct-auth-request-url
-                    #`"https://,(api-server)/api/v1/oauth"
+                    #"https://~(api-server)/api/v1/oauth"
                     client-id :scope "all"
                     :redirect redirect-uri)
       (print "Open the following url and type in the shown PIN.")
@@ -98,7 +99,7 @@
 
   (define (request code)
     (let1 json (oauth2-request-auth-token
-                #`"https://,(api-server)/api/v1/oauth/access_token"
+                #"https://~(api-server)/api/v1/oauth/access_token"
                 code redirect-uri client-id
                 ;; optional param
                 :client-secret client-secret)
@@ -124,14 +125,23 @@
 
 (define (yamareco-read-credential file)
   (with-input-from-file file
-    (^() (oauth2-read-token <yamareco-cred>))))
+    (^[]
+      (let1 sexp (read)
+        (make <yamareco-cred>
+          :access-token (assq-ref sexp 'access-token)
+          :client-id (assq-ref sexp 'client-id)
+          :client-secret (assq-ref sexp 'client-secret))))))
 
 (define (yamareco-write-credential cred file)
   (with-output-to-file file
-    (^() (oauth2-write-token cred)))
+    (^()
+      (pprint
+       `(
+         (access-token ,(~ cred'access-token))
+         (client-id ,(~ cred'client-id))
+         (client-secret ,(~ cred'client-secret))
+         ))))
   (sys-chmod file #o600))
-
-
 
 ;;
 ;; Low level API
@@ -140,7 +150,7 @@
 (define (GET/json path :optional (cred #f))
   (call-with-values
       (^() (http-get (api-server)
-                      #`"/api/v1,|path|"
+                      #"/api/v1~|path|"
                       :Authorization (oauth-token cred)
                       :secure (api-use-ssl)))
     read-response))
@@ -148,7 +158,7 @@
 (define (POST/json path request :optional (cred #f))
   (call-with-values
       (^() (http-post (api-server)
-                      #`"/api/v1,|path|"
+                      #"/api/v1~|path|"
                       (http-compose-query #f request 'utf-8)
                       :Authorization (oauth-token cred)
                       :secure (api-use-ssl)
@@ -200,11 +210,11 @@
 (define (get-record-list/json :key (page #f) (max-id #f) (userID #f))
   (let1 path "/getReclist"
     (when userID
-      (set! path #`",|path|/user/,|userID|"))
+      (set! path #"~|path|/user/~|userID|"))
     (when page
-      (set! path #`",|path|/,|page|"))
+      (set! path #"~|path|/~|page|"))
     (when (and max-id (not userID))
-      (set! path #`",|path|?max_id=,|max-id|"))
+      (set! path #"~|path|?max_id=~|max-id|"))
     (GET/json path)))
 
 ;; https://sites.google.com/site/apiforyamareco/api/api_rec#TOC-2.-searchRec-OAuth-
@@ -252,35 +262,35 @@
 (define (get-user-info/json :key (uid #f))
   (let1 path "/getUserInfo"
     (when uid
-      (set! path #`",|path|/,|uid|"))
+      (set! path #"~|path|/~|uid|"))
     (GET/json path)))
 
 ;; type: rec/rec_photo
 (define (get-cheer-list/json cred type id)
   (let1 path "/getCheerlist"
     (when (and type id)
-      (set! path #`",|path|/,|type|/,|id|"))
+      (set! path #"~|path|/~|type|/~|id|"))
     (GET/json path cred)))
 
 (define (get-record/json cred rec-id)
   (let1 path "/getRec"
-    (set! path #`",|path|/,|rec-id|")
+    (set! path #"~|path|/~|rec-id|")
     (GET/json path cred)))
 
 (define (get-plan-list/json :key (page #f) (user-id #f))
   (let1 path "/getPlanlist"
     (cond
      [(and user-id page)
-      (set! path #`",|path|/,|user-id|/,|page|")]
+      (set! path #"~|path|/~|user-id|/~|page|")]
      [page
-      (set! path #`",|path|/,|page|")])
+      (set! path #"~|path|/~|page|")])
     (GET/json path)))
 
 (define (get-plan/json cred plan-id)
-  (let1 path #`"/getPlan/,|plan-id|"
+  (let1 path #"/getPlan/~|plan-id|"
     (GET/json path cred)))
 
 (define (get-plan-comment-list/json cred plan-id)
-  (let1 path #`"/getPlanCommentlist/,|plan-id|"
+  (let1 path #"/getPlanCommentlist/~|plan-id|"
     (GET/json path cred)))
 
