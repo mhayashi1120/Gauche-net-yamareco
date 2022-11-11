@@ -31,7 +31,7 @@ LOCAL_PATHS = "@LOCAL_PATHS@"
 PACKAGE   = Gauche-net-yamareco
 
 ARCHFILES =
-SCMFILES  = $(srcdir)/net/yamareco.scm
+SCMFILES  = $(srcdir)/net/yamareco.scm $(srcdir)/net/yamareco/api.scm
 HEADERS   =
 
 TARGET    = $(ARCHFILES)
