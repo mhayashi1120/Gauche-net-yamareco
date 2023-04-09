@@ -21,14 +21,13 @@ jobs:
       # TODO workaround https://github.com/actions/checkout/issues/1048
       - uses: actions/checkout@v3.1.0
         with:
-          submodules: recursive
+          submodules: true
       - name: Setup package
         run: |
       - name: Setup gauche submodule packages
         run: |
           set -eu;
           cd packages/.modules;
-          git submodule update --init
           find . -type d -mindepth 1 -maxdepth 1 | sort | while read pkg; do
             echo "Installing ${pkg} in sub process";
             (
