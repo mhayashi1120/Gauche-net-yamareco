@@ -1,5 +1,6 @@
-test.log
-config.log
-*.gpd
+/test.log
+/config.log
+/Gauche-net-yamareco.gpd
+/VERSION
+
 Makefile
-VERSION
