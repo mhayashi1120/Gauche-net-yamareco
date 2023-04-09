@@ -34,6 +34,8 @@ ARCHFILES =
 SCMFILES  = $(srcdir)/net/yamareco.scm $(srcdir)/net/yamareco/api.scm
 HEADERS   =
 
+TEST_LOG = test.log
+
 TARGET    = $(ARCHFILES)
 CLEANFILES =
 CONFIG_GENERATED = Makefile config.cache config.log config.status \
@@ -48,8 +50,8 @@ net_yamareco_SRCS =
 all : $(TARGET)
 
 check : all
-	@rm -f test.log
-	$(GOSH) -I. -I$(srcdir) $(srcdir)/test.scm > test.log
+	@rm -f $(TEST_LOG)
+	$(GOSH) -I. -I$(srcdir) $(srcdir)/test.scm > $(TEST_LOG)
 
 install : all
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGINCDIR) $(HEADERS)
@@ -65,7 +67,7 @@ uninstall :
 
 clean :
 	$(GAUCHE_PACKAGE) compile --clean net_yamareco $(net_yamareco_SRCS)
-	rm -rf core $(TARGET) $(CLEANFILES) *~ test.log so_locations
+	rm -rf core $(TARGET) $(CLEANFILES) *~ $(TEST_LOG) so_locations
 
 distclean : clean
 	rm -rf $(CONFIG_GENERATED)
