@@ -21,7 +21,7 @@ jobs:
       # TODO workaround https://github.com/actions/checkout/issues/1048
       - uses: actions/checkout@v3.1.0
         with:
-          submodules: true
+          submodules: recursive
       - name: Setup package
         run: |
       - name: Setup gauche submodule packages
