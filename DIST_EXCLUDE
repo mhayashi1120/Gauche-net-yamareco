@@ -1,4 +1,4 @@
 .secret
 .github
-packages/.modules
+packages/.modules/*
 

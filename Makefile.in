@@ -75,3 +75,6 @@ distclean : clean
 maintainer-clean : clean
 	rm -rf $(CONFIG_GENERATED)  VERSION
 
+validate :
+	@echo "Testing current setup"
+	$(GOSH) $(srcdir)/test.scm >> $(TEST_LOG)

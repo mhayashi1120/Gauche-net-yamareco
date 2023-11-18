@@ -3,7 +3,7 @@
 ;;
 
 (define-gauche-package "Gauche-net-yamareco"
-  :version "0.3.4"
+  :version "0.3.5"
 
   ;; Description of the package.  The first line is used as a short
   ;; summary.
