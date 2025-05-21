@@ -18,8 +18,7 @@ jobs:
     container:
       image: practicalscheme/gauche
     steps:
-      # TODO workaround https://github.com/actions/checkout/issues/1048
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Setup package
